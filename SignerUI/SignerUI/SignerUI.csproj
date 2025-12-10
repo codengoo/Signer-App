@@ -11,6 +11,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\SignerAPI\SignerAPI.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Resource Include="Resources\app_icon.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Resource>

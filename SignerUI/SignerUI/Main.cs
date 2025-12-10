@@ -7,9 +7,11 @@ namespace SignerUI
         private readonly ToolStripMenuItem startMenuItem = new("Bắt đầu");
         private readonly ToolStripMenuItem stopMenuItem = new ("Kết thúc");
         private readonly ToolStripMenuItem killMenuItem = new ("Thoát");
+        private readonly string HostURL;
 
-        public Main()
+        public Main(string Host)
         {
+            HostURL = Host;
             InitializeComponent();
             Hide();
             WindowState = FormWindowState.Minimized;
@@ -31,7 +33,6 @@ namespace SignerUI
             }
             catch (FileNotFoundException ex)
             {
-                // Xử lý lỗi nếu file icon không tìm thấy
                 MessageBox.Show("Không tìm thấy file icon: " + ex.Message, "Lỗi Icon", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
@@ -39,8 +40,7 @@ namespace SignerUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //MessageBox.Show("Đã khởi động thành công!. Ứng dụng đang chạy ở port: ");
-            Startup startup = new Startup("https://gemini.google.com/app");
+            Startup startup = new Startup(HostURL);
             startup.ShowDialog();
         }
 
