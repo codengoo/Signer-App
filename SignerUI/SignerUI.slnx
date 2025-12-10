@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../SignerAPI/SignerAPI.csproj" />
+  <Project Path="SignerUI/SignerUI.csproj" />
+</Solution>
