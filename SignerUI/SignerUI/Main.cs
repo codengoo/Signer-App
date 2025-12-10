@@ -8,9 +8,9 @@ namespace SignerUI
         private readonly ToolStripMenuItem startMenuItem = new("Bắt đầu");
         private readonly ToolStripMenuItem stopMenuItem = new("Kết thúc");
         private readonly ToolStripMenuItem killMenuItem = new("Thoát");
-        private readonly string HostURL;
-        private readonly WebApplication webApp;
-        private readonly Task runTask;
+        private  string HostURL;
+        private  WebApplication webApp;
+        private  Task runTask;
         private bool isActionRunning = false;
 
         private void UpdateMenuState(bool running)
@@ -20,15 +20,21 @@ namespace SignerUI
             stopMenuItem.Enabled = !running;
         }
 
-        public Main(WebApplication app, string Host, Task runTask)
+        public Main(WebApplication app)
         {
-            HostURL = Host;
-            webApp = app;
-            this.runTask = runTask;
             InitializeComponent();
             Hide();
             WindowState = FormWindowState.Minimized;
             ShowInTaskbar = false;
+
+
+            using var startupEvent = new ManualResetEventSlim(false);
+            Action<ICollection<string>> onStarted = (urls) =>
+            {
+                startupEvent.Set();
+            };
+            this.webApp = SignerAPI.ApiHost.Create(onStarted);
+            this.runTask = Task.Run(() => { app.Run(); });
 
             try
             {
@@ -58,10 +64,23 @@ namespace SignerUI
             startup.ShowDialog();
         }
 
-        private void StartMenuItem_Click(object sender, EventArgs e)
+        private async void StartMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Đã click 'Bắt đầu'", "Hành động", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            Debug.WriteLine("Hành động BẮT ĐẦU được kích hoạt.");
+            UpdateMenuState(true);
+
+            try
+            {
+                await Task.Run(() => SignerAPI.ApiHost.StopApp(webApp, runTask));
+                MessageBox.Show("Đã bắt đầu dịch vụ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi trong quá trình khởi động: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                UpdateMenuState(false);
+            }
         }
 
         private async void StopMenuItem_Click(object sender, EventArgs e)

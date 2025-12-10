@@ -31,17 +31,16 @@ namespace SignerAPI
 
         public static bool StopApp(WebApplication app, Task runTask)
         {
-            try
-            {
-                var lifetime = app.Services.GetService<IHostApplicationLifetime>();
-                lifetime?.StopApplication();
+            var lifetime = app.Services.GetService<IHostApplicationLifetime>();
+            lifetime?.StopApplication();
 
-                return runTask.Wait(TimeSpan.FromSeconds(5));
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return runTask.Wait(TimeSpan.FromSeconds(5));
+        }
+
+        public static bool StartApp(WebApplication app)
+        {
+            app.Run();
+            return true;
         }
 
         public static void Main()

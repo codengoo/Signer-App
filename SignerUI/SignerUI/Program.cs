@@ -11,15 +11,7 @@
             ApplicationConfiguration.Initialize();
             ICollection<string>? apiUrls = null;
 
-            using var startupEvent = new ManualResetEventSlim(false);
-            Action<ICollection<string>> onStarted = (urls) =>
-            {
-                apiUrls = urls;
-                startupEvent.Set();
-            };
-            var app = SignerAPI.ApiHost.Create(onStarted);
-
-            Task apiRunTask =  Task.Run(() => { app.Run(); });
+            
 
             // *** 2. Chờ đợi API khởi động thành công và lấy URL ***
             // Chờ cho đến khi Task nền gọi startupEvent.Set() (có timeout 10s đề phòng lỗi)
