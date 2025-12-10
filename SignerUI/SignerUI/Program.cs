@@ -8,30 +8,25 @@
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            ICollection<string> apiUrls = null;
+            ICollection<string>? apiUrls = null;
+
             using var startupEvent = new ManualResetEventSlim(false);
-
-            Task.Run(() =>
+            Action<ICollection<string>> onStarted = (urls) =>
             {
-                Action<ICollection<string>> onStarted = (urls) =>
-                 {
-                     apiUrls = urls;
-                     startupEvent.Set();
-                 };
+                apiUrls = urls;
+                startupEvent.Set();
+            };
+            var app = SignerAPI.ApiHost.Create(onStarted);
 
-                var app = SignerAPI.ApiHost.Create(onStarted);
-                app.Run();
-            });
+            Task apiRunTask =  Task.Run(() => { app.Run(); });
 
             // *** 2. Chờ đợi API khởi động thành công và lấy URL ***
             // Chờ cho đến khi Task nền gọi startupEvent.Set() (có timeout 10s đề phòng lỗi)
             if (startupEvent.Wait(TimeSpan.FromSeconds(10)))
             {
                 var urls = string.Join(", ", apiUrls ?? ["Không tìm thấy URL"]);
-                Application.Run(new Main(urls));
+                Application.Run(new Main(app, urls, apiRunTask));
             }
             else
             {
