@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option csharp_namespace = "WorkerProto";
+
+service Worker {
+  rpc DoWork (WorkRequest) returns (WorkReply);
+}
+
+message WorkRequest {
+  string input = 1;
+}
+
+message WorkReply {
+  string output = 1;
+}
