@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Win32;
-using System.Diagnostics;
 using SignerUI.Common;
 
 namespace SignerUI
@@ -31,9 +30,7 @@ namespace SignerUI
         public Main()
         {
             InitializeComponent();
-            Hide();
-            WindowState = FormWindowState.Minimized;
-            ShowInTaskbar = false;
+            
 
             webApp = SignerAPI.ApiHost.Create((urls) =>
             {
@@ -50,6 +47,9 @@ namespace SignerUI
                 autoStartMenuItem.Click += new EventHandler(AutoStartMenuItem_Click!);
                 autoStartMenuItem.Checked = IsEnableAutoStart;
 
+                startMenuItem.Image = Properties.Resources.start;
+                stopMenuItem.Image = Properties.Resources.stop;
+
                 contextMenuStrip.Items.Add(aboutMenuItem);
                 contextMenuStrip.Items.Add(new ToolStripSeparator());
                 contextMenuStrip.Items.Add(startMenuItem);
@@ -58,8 +58,7 @@ namespace SignerUI
                 contextMenuStrip.Items.Add(new ToolStripSeparator());
                 contextMenuStrip.Items.Add(exitMenuItem);
 
-                string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "app_icon.ico");
-                notifyIcon.Icon = new Icon(iconPath);
+                notifyIcon.Icon = Properties.Resources.app_icon;
                 notifyIcon.ContextMenuStrip = contextMenuStrip;
             }
             catch (FileNotFoundException ex)
