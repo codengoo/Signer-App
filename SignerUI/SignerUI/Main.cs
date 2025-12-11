@@ -7,8 +7,8 @@ namespace SignerUI
     public partial class Main : Form
     {
         private readonly ToolStripMenuItem aboutMenuItem = new("Về chúng tôi");
-        private readonly ToolStripMenuItem startMenuItem = new("Bắt đầu");
-        private readonly ToolStripMenuItem stopMenuItem = new("Kết thúc");
+        private readonly ToolStripMenuItem startMenuItem = new("Khởi động dịch vụ");
+        private readonly ToolStripMenuItem stopMenuItem = new("Dừng dịch vụ");
         private readonly ToolStripMenuItem exitMenuItem = new("Thoát");
         private readonly ToolStripMenuItem autoStartMenuItem = new("Khởi động cùng hệ thống", null, null, "AutoStartMenuItem")
         {
@@ -20,6 +20,7 @@ namespace SignerUI
         private readonly WebApplication webApp;
         private Task? runTask;
         private ManualResetEventSlim? startupEvent = new ManualResetEventSlim(false);
+        private bool IsRunning;
 
         private void UpdateMenuState(bool running)
         {
@@ -30,50 +31,46 @@ namespace SignerUI
         public Main()
         {
             InitializeComponent();
-            
 
+            startMenuItem.Click += new EventHandler(StartMenuItem_Click!);
+            stopMenuItem.Click += new EventHandler(StopMenuItem_Click!);
+            exitMenuItem.Click += new EventHandler(KillMenuItem_Click!);
+            autoStartMenuItem.Click += new EventHandler(AutoStartMenuItem_Click!);
+            autoStartMenuItem.Checked = IsEnableAutoStart;
+
+            startMenuItem.Image = Properties.Resources.start;
+            stopMenuItem.Image = Properties.Resources.stop;
+
+            contextMenuStrip.Items.Add(aboutMenuItem);
+            contextMenuStrip.Items.Add(new ToolStripSeparator());
+            contextMenuStrip.Items.Add(startMenuItem);
+            contextMenuStrip.Items.Add(stopMenuItem);
+            contextMenuStrip.Items.Add(autoStartMenuItem);
+            contextMenuStrip.Items.Add(new ToolStripSeparator());
+            contextMenuStrip.Items.Add(exitMenuItem);
+
+            notifyIcon.Icon = Properties.Resources.app_icon;
+            notifyIcon.ContextMenuStrip = contextMenuStrip;
+
+            // Init
             webApp = SignerAPI.ApiHost.Create((urls) =>
             {
                 HostURL = urls.First() ?? "";
                 startupEvent.Set();
             });
 
-            // UI
-            try
-            {
-                startMenuItem.Click += new EventHandler(StartMenuItem_Click!);
-                stopMenuItem.Click += new EventHandler(StopMenuItem_Click!);
-                exitMenuItem.Click += new EventHandler(KillMenuItem_Click!);
-                autoStartMenuItem.Click += new EventHandler(AutoStartMenuItem_Click!);
-                autoStartMenuItem.Checked = IsEnableAutoStart;
-
-                startMenuItem.Image = Properties.Resources.start;
-                stopMenuItem.Image = Properties.Resources.stop;
-
-                contextMenuStrip.Items.Add(aboutMenuItem);
-                contextMenuStrip.Items.Add(new ToolStripSeparator());
-                contextMenuStrip.Items.Add(startMenuItem);
-                contextMenuStrip.Items.Add(stopMenuItem);
-                contextMenuStrip.Items.Add(autoStartMenuItem);
-                contextMenuStrip.Items.Add(new ToolStripSeparator());
-                contextMenuStrip.Items.Add(exitMenuItem);
-
-                notifyIcon.Icon = Properties.Resources.app_icon;
-                notifyIcon.ContextMenuStrip = contextMenuStrip;
-            }
-            catch (FileNotFoundException ex)
-            {
-                MessageBox.Show("Không tìm thấy file icon: " + ex.Message, "Lỗi Icon", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            runTask = Task.Run(() => SignerAPI.ApiHost.StartApp(webApp));
+            stopMenuItem.Visible = true;
+            startMenuItem.Visible = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (startupEvent != null && startupEvent.Wait(10))
-            {
-                Startup startup = new(HostURL ?? "");
-                startup.ShowDialog();
-            }
+            //if (startupEvent != null && startupEvent.Wait(10))
+            //{
+            //    Startup startup = new(HostURL ?? "");
+            //    startup.ShowDialog();
+            //}
         }
 
         private async void StartMenuItem_Click(object sender, EventArgs e)
@@ -84,6 +81,8 @@ namespace SignerUI
             {
                 runTask = Task.Run(() => SignerAPI.ApiHost.StartApp(webApp));
                 MessageBox.Show("Đã bắt đầu dịch vụ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                stopMenuItem.Visible = true;
+                startMenuItem.Visible = false;
             }
             catch (Exception ex)
             {
@@ -104,6 +103,8 @@ namespace SignerUI
                 startupEvent = null;
                 await Task.Run(() => SignerAPI.ApiHost.StopApp(webApp, runTask));
                 MessageBox.Show("Đã dừng dịch vụ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                startMenuItem.Visible = true;
+                stopMenuItem.Visible = false;
             }
             catch (Exception ex)
             {
