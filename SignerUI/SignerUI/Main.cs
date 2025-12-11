@@ -52,6 +52,9 @@ namespace SignerUI
             notifyIcon.Icon = Properties.Resources.app_icon;
             notifyIcon.ContextMenuStrip = contextMenuStrip;
 
+            stopMenuItem.Visible = true;
+            startMenuItem.Visible = false;
+
             // Init
             webApp = SignerAPI.ApiHost.Create((urls) =>
             {
@@ -60,8 +63,6 @@ namespace SignerUI
             });
 
             runTask = Task.Run(() => SignerAPI.ApiHost.StartApp(webApp));
-            stopMenuItem.Visible = true;
-            startMenuItem.Visible = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
