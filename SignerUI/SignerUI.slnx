@@ -4,6 +4,7 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="Shared/Shared.shproj" Id="71d3b149-43df-407c-ad8f-7cbebe0f0c09" />
   <Project Path="SignerAPI/SignerAPI.csproj" />
   <Project Path="SignerCore/SignerCore.csproj">
     <Platform Solution="*|x64" Project="x64" />

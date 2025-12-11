@@ -18,6 +18,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Protobuf Include="../Protos/worker.proto" GrpcServices="Server" />
+		<Protobuf Include="..\Shared\Protos\worker.proto" GrpcServices="Server" />
 	</ItemGroup>
+
+	<Import Project="..\Shared\Shared.projitems" Label="Shared" />
 </Project>
