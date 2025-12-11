@@ -28,5 +28,20 @@ namespace SignerUI
 
             this.Close();
         }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var cp = base.CreateParams;
+
+                const int WS_EX_TOOLWINDOW = 0x00000080;
+
+                // Loại bỏ toolwindow → hiện lại Alt+Tab, TaskView
+                cp.ExStyle &= ~WS_EX_TOOLWINDOW;
+
+                return cp;
+            }
+        }
     }
 }

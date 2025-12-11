@@ -4,8 +4,9 @@ using SignerUI.Common;
 
 namespace SignerUI
 {
-    public partial class Main : Form
+    public class AppContext : ApplicationContext
     {
+        private readonly NotifyIcon notifyIcon;
         private readonly ToolStripMenuItem aboutMenuItem = new("Về chúng tôi");
         private readonly ToolStripMenuItem startMenuItem = new("Khởi động dịch vụ");
         private readonly ToolStripMenuItem stopMenuItem = new("Dừng dịch vụ");
@@ -27,10 +28,8 @@ namespace SignerUI
             stopMenuItem.Enabled = !running;
         }
 
-        public Main()
+        public AppContext()
         {
-            InitializeComponent();
-
             startMenuItem.Click += new EventHandler(StartMenuItem_Click!);
             stopMenuItem.Click += new EventHandler(StopMenuItem_Click!);
             exitMenuItem.Click += new EventHandler(KillMenuItem_Click!);
@@ -39,7 +38,11 @@ namespace SignerUI
 
             startMenuItem.Image = Properties.Resources.start;
             stopMenuItem.Image = Properties.Resources.stop;
+            
+            stopMenuItem.Visible = true;
+            startMenuItem.Visible = false;
 
+            var contextMenuStrip = new ContextMenuStrip();
             contextMenuStrip.Items.Add(aboutMenuItem);
             contextMenuStrip.Items.Add(new ToolStripSeparator());
             contextMenuStrip.Items.Add(startMenuItem);
@@ -48,18 +51,16 @@ namespace SignerUI
             contextMenuStrip.Items.Add(new ToolStripSeparator());
             contextMenuStrip.Items.Add(exitMenuItem);
 
-            notifyIcon.Icon = Properties.Resources.app_icon;
-            notifyIcon.ContextMenuStrip = contextMenuStrip;
-
-            stopMenuItem.Visible = true;
-            startMenuItem.Visible = false;
+            notifyIcon = new NotifyIcon()
+            {
+                Icon = Properties.Resources.app_icon,
+                Visible = true,
+                ContextMenuStrip = contextMenuStrip,
+                Text = "Signer"
+            };
 
             // Init
             StartService();
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
             ShowServiceInfo();
         }
 
