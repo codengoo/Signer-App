@@ -55,10 +55,36 @@ namespace SignerUI
             startMenuItem.Visible = false;
 
             // Init
-            StartMenuItem_Click(null, null);
+            StartService();
         }
 
         private void Form1_Load(object sender, EventArgs e)
+        {
+            ShowServiceInfo();
+        }
+
+        private void StartService()
+        {
+            webApp = SignerAPI.ApiHost.Create((urls) =>
+            {
+                HostURL = urls.First() ?? "";
+                startupEvent.Set();
+            });
+            runTask = Task.Run(() => webApp.Run());
+        }
+
+        private async void StopService()
+        {
+            if (webApp == null) throw new Exception("No web app service instance!");
+            await Task.Run(() => SignerAPI.ApiHost.StopApp(webApp, runTask));
+
+            // Reset
+            startupEvent = new(false);
+            webApp = null;
+            runTask = null;
+        }
+
+        private void ShowServiceInfo()
         {
             if (startupEvent.Wait(10))
             {
@@ -67,19 +93,14 @@ namespace SignerUI
             }
         }
 
-        private async void StartMenuItem_Click(object? sender, EventArgs? e)
+        private async void StartMenuItem_Click(object sender, EventArgs e)
         {
             UpdateMenuState(true);
 
             try
             {
-                // Init
-                webApp = SignerAPI.ApiHost.Create((urls) =>
-                {
-                    HostURL = urls.First() ?? "";
-                    startupEvent.Set();
-                });
-                runTask = Task.Run(() => webApp.Run());
+                StartService();
+                ShowServiceInfo();
 
                 // UI
                 stopMenuItem.Visible = true;
@@ -101,13 +122,7 @@ namespace SignerUI
 
             try
             {
-                if (webApp == null) throw new Exception("No web app service instance!");
-                await Task.Run(() => SignerAPI.ApiHost.StopApp(webApp, runTask));
-
-                // Reset
-                startupEvent = new(false);
-                webApp = null;
-                runTask = null;
+                StopService();
 
                 // UI
                 MessageBox.Show("Đã dừng dịch vụ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
