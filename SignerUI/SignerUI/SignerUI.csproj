@@ -16,7 +16,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\SignerAPI\SignerAPI.csproj" />
+	  <ProjectReference Include="..\SignerAPI\SignerAPI.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
