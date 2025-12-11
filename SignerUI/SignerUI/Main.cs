@@ -1,13 +1,22 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Win32;
 using System.Diagnostics;
+using SignerUI.Common;
 
 namespace SignerUI
 {
     public partial class Main : Form
     {
+        private readonly ToolStripMenuItem aboutMenuItem = new("Về chúng tôi");
         private readonly ToolStripMenuItem startMenuItem = new("Bắt đầu");
         private readonly ToolStripMenuItem stopMenuItem = new("Kết thúc");
-        private readonly ToolStripMenuItem killMenuItem = new("Thoát");
+        private readonly ToolStripMenuItem exitMenuItem = new("Thoát");
+        private readonly ToolStripMenuItem autoStartMenuItem = new("Khởi động cùng hệ thống", null, null, "AutoStartMenuItem")
+        {
+            CheckOnClick = true,
+            Checked = false
+        };
+
         private string? HostURL;
         private readonly WebApplication webApp;
         private Task? runTask;
@@ -37,12 +46,17 @@ namespace SignerUI
             {
                 startMenuItem.Click += new EventHandler(StartMenuItem_Click!);
                 stopMenuItem.Click += new EventHandler(StopMenuItem_Click!);
-                killMenuItem.Click += new EventHandler(KillMenuItem_Click!);
+                exitMenuItem.Click += new EventHandler(KillMenuItem_Click!);
+                autoStartMenuItem.Click += new EventHandler(AutoStartMenuItem_Click!);
+                autoStartMenuItem.Checked = IsEnableAutoStart;
 
+                contextMenuStrip.Items.Add(aboutMenuItem);
+                contextMenuStrip.Items.Add(new ToolStripSeparator());
                 contextMenuStrip.Items.Add(startMenuItem);
                 contextMenuStrip.Items.Add(stopMenuItem);
+                contextMenuStrip.Items.Add(autoStartMenuItem);
                 contextMenuStrip.Items.Add(new ToolStripSeparator());
-                contextMenuStrip.Items.Add(killMenuItem);
+                contextMenuStrip.Items.Add(exitMenuItem);
 
                 string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "app_icon.ico");
                 notifyIcon.Icon = new Icon(iconPath);
@@ -56,9 +70,9 @@ namespace SignerUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (startupEvent != null && startupEvent.Wait(5))
+            if (startupEvent != null && startupEvent.Wait(10))
             {
-                Startup startup = new Startup(HostURL ?? "");
+                Startup startup = new(HostURL ?? "");
                 startup.ShowDialog();
             }
         }
@@ -105,6 +119,52 @@ namespace SignerUI
         private void KillMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void AutoStartMenuItem_Click(object sender, EventArgs e)
+        {
+            bool isChecked = autoStartMenuItem.Checked;
+
+            try
+            {
+                using RegistryKey? key = Registry.CurrentUser.OpenSubKey(Constants.RunPathRegistry, true) ??
+                    throw new Exception("Không thể truy cập Registry.");
+
+                string exePath = Application.ExecutablePath;
+
+                if (isChecked)
+                {
+                    // Bật tự động khởi động
+                    key.SetValue(Constants.AppName, $"\"{exePath}\"");
+                }
+                else
+                {
+                    // Tắt tự động khởi động
+                    if (key.GetValue(Constants.AppName) != null)
+                        key.DeleteValue(Constants.AppName);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi ghi Registry: " + ex.Message);
+                autoStartMenuItem.Checked = !isChecked;
+            }
+        }
+
+        private static bool IsEnableAutoStart
+        {
+            get
+            {
+                using RegistryKey? key = Registry.CurrentUser.OpenSubKey(Constants.RunPathRegistry);
+
+                if (key != null)
+                {
+                    string? value = (string)key.GetValue(Constants.AppName);
+                    return !string.IsNullOrEmpty(value);
+                }
+
+                return false;
+            }
         }
     }
 }
