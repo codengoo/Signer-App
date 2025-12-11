@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Win32;
 using SignerUI.Common;
+using SignerUI.Views;
 
 namespace SignerUI
 {
@@ -34,6 +35,7 @@ namespace SignerUI
             stopMenuItem.Click += new EventHandler(StopMenuItem_Click!);
             exitMenuItem.Click += new EventHandler(KillMenuItem_Click!);
             autoStartMenuItem.Click += new EventHandler(AutoStartMenuItem_Click!);
+            aboutMenuItem.Click += new EventHandler(About_Click!);
             autoStartMenuItem.Checked = IsEnableAutoStart;
 
             startMenuItem.Image = Properties.Resources.start;
@@ -173,6 +175,12 @@ namespace SignerUI
                 MessageBox.Show("Lỗi khi ghi Registry: " + ex.Message);
                 autoStartMenuItem.Checked = !isChecked;
             }
+        }
+
+        private void About_Click(object sender, EventArgs e)
+        {
+            About about = new();
+            about.ShowDialog();
         }
 
         private static bool IsEnableAutoStart
