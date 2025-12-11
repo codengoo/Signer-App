@@ -55,14 +55,16 @@ namespace SignerUI
             startMenuItem.Visible = false;
 
             // Init
-
-
             StartMenuItem_Click(null, null);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            if (startupEvent.Wait(10))
+            {
+                Startup startup = new(HostURL ?? "");
+                startup.ShowDialog();
+            }
         }
 
         private async void StartMenuItem_Click(object? sender, EventArgs? e)
@@ -71,19 +73,15 @@ namespace SignerUI
 
             try
             {
+                // Init
                 webApp = SignerAPI.ApiHost.Create((urls) =>
                 {
                     HostURL = urls.First() ?? "";
                     startupEvent.Set();
                 });
-
                 runTask = Task.Run(() => webApp.Run());
-                if (startupEvent.Wait(10))
-                {
-                    Startup startup = new(HostURL ?? "");
-                    startup.ShowDialog();
-                }
 
+                // UI
                 stopMenuItem.Visible = true;
                 startMenuItem.Visible = false;
             }
