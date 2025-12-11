@@ -17,10 +17,9 @@ namespace SignerUI
         };
 
         private string? HostURL;
-        private readonly WebApplication webApp;
+        private WebApplication? webApp;
         private Task? runTask;
-        private ManualResetEventSlim? startupEvent = new ManualResetEventSlim(false);
-        private bool IsRunning;
+        private ManualResetEventSlim startupEvent = new(false);
 
         private void UpdateMenuState(bool running)
         {
@@ -56,32 +55,35 @@ namespace SignerUI
             startMenuItem.Visible = false;
 
             // Init
-            webApp = SignerAPI.ApiHost.Create((urls) =>
-            {
-                HostURL = urls.First() ?? "";
-                startupEvent.Set();
-            });
 
-            runTask = Task.Run(() => SignerAPI.ApiHost.StartApp(webApp));
+
+            StartMenuItem_Click(null, null);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //if (startupEvent != null && startupEvent.Wait(10))
-            //{
-            //    Startup startup = new(HostURL ?? "");
-            //    startup.ShowDialog();
-            //}
+
         }
 
-        private async void StartMenuItem_Click(object sender, EventArgs e)
+        private async void StartMenuItem_Click(object? sender, EventArgs? e)
         {
             UpdateMenuState(true);
 
             try
             {
-                runTask = Task.Run(() => SignerAPI.ApiHost.StartApp(webApp));
-                MessageBox.Show("Đã bắt đầu dịch vụ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                webApp = SignerAPI.ApiHost.Create((urls) =>
+                {
+                    HostURL = urls.First() ?? "";
+                    startupEvent.Set();
+                });
+
+                runTask = Task.Run(() => webApp.Run());
+                if (startupEvent.Wait(10))
+                {
+                    Startup startup = new(HostURL ?? "");
+                    startup.ShowDialog();
+                }
+
                 stopMenuItem.Visible = true;
                 startMenuItem.Visible = false;
             }
@@ -101,8 +103,15 @@ namespace SignerUI
 
             try
             {
-                startupEvent = null;
+                if (webApp == null) throw new Exception("No web app service instance!");
                 await Task.Run(() => SignerAPI.ApiHost.StopApp(webApp, runTask));
+
+                // Reset
+                startupEvent = new(false);
+                webApp = null;
+                runTask = null;
+
+                // UI
                 MessageBox.Show("Đã dừng dịch vụ", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 startMenuItem.Visible = true;
                 stopMenuItem.Visible = false;
