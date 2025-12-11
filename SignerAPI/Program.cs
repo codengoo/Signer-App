@@ -22,8 +22,6 @@ namespace SignerAPI
                 onStartedCallback?.Invoke(runningUrls);
             });
 
-
-
             app.MapGet("/", () => "Hello World!");
 
             return app;

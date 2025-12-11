@@ -1,4 +1,6 @@
-﻿namespace SignerUI
+﻿using System.Security.Policy;
+
+namespace SignerUI
 {
     internal static class Program
     {
@@ -9,22 +11,7 @@
         static void Main()
         {
             ApplicationConfiguration.Initialize();
-            ICollection<string>? apiUrls = null;
-
-            
-
-            // *** 2. Chờ đợi API khởi động thành công và lấy URL ***
-            // Chờ cho đến khi Task nền gọi startupEvent.Set() (có timeout 10s đề phòng lỗi)
-            if (startupEvent.Wait(TimeSpan.FromSeconds(10)))
-            {
-                var urls = string.Join(", ", apiUrls ?? ["Không tìm thấy URL"]);
-                Application.Run(new Main(app, urls, apiRunTask));
-            }
-            else
-            {
-                MessageBox.Show("Lỗi: SignerAPI không khởi động kịp sau 10 giây.", "API Status", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            Application.Run(new Main());
         }
     }
 }
