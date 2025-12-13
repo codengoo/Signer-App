@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
-using SignerAPI.Domains;
+using SignerAPI.Domains.WorkerCall;
+using SignerAPI.Middlewares;
+using SignerAPI.Services;
 
 namespace SignerAPI
 {
@@ -9,6 +11,11 @@ namespace SignerAPI
         public static WebApplication Create(Action<ICollection<string>>? onStartedCallback = null)
         {
             var builder = WebApplication.CreateBuilder();
+
+            builder.Services.AddControllers();
+            builder.Services.AddScoped<IWorkerCall, WorkerCall>();
+            builder.Services.AddScoped<ISignService, SignService>();
+
             var app = builder.Build();
 
             var lifetime = app.Services.GetService<IHostApplicationLifetime>();
@@ -23,8 +30,12 @@ namespace SignerAPI
                 onStartedCallback?.Invoke(runningUrls);
             });
 
-            app.MapGet("/", () => "Hello World!");
-            app.MapGet("/test", () => ExternalCall.Call());
+            //app.MapGet("/", () => "Hello World!");
+            //app.MapGet("/test", () => WorkerCall.Call());
+            //app.MapGet("/start-core-service", () => WorkerCall.StartCoreServiceAsync());
+
+            app.UseMiddleware<ApiExceptionMiddleware>();
+            app.MapControllers();
 
             return app;
         }
