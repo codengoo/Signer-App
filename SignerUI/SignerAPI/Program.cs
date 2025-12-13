@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using SignerAPI.Domains;
 
 namespace SignerAPI
 {
@@ -23,6 +24,7 @@ namespace SignerAPI
             });
 
             app.MapGet("/", () => "Hello World!");
+            app.MapGet("/test", () => ExternalCall.Call());
 
             return app;
         }

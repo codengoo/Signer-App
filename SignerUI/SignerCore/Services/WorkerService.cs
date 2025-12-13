@@ -1,13 +1,17 @@
 ﻿using Grpc.Core;
 using WorkerProto;
 
-public class WorkerService : Worker.WorkerBase
+namespace SignerCore.Services
 {
-    public override Task<WorkReply> DoWork(WorkRequest request, ServerCallContext context)
+    public class WorkerService : Worker.WorkerBase
     {
-        return Task.FromResult(new WorkReply
+        public override Task<WorkReply> DoWork(WorkRequest request, ServerCallContext context)
         {
-            Output = $"Child process received: {request.Input}"
-        });
+            Console.WriteLine(request);
+            return Task.FromResult(new WorkReply
+            {
+               ListCert = new ListCertReply() { Pin = "abc"}
+            });
+        }
     }
 }

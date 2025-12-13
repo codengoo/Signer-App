@@ -3,13 +3,55 @@ syntax = "proto3";
 option csharp_namespace = "WorkerProto";
 
 service Worker {
-  rpc DoWork (WorkRequest) returns (WorkReply);
+    rpc DoWork(WorkRequest) returns (WorkReply);
+}
+
+enum TaskType {
+    LIST_CERTS_UNSPECIFIED = 0;
+    SIGN_HASH = 1;
+    SIGN_PDF = 2;
 }
 
 message WorkRequest {
-  string input = 1;
+    TaskType task = 1;
+
+    oneof payload {
+        ListCertRequest list_cert = 2;
+        SignHashRequest sign_hash = 3;
+        SignPdfRequest sign_pdf = 4;
+    }
 }
 
 message WorkReply {
-  string output = 1;
+    oneof result {
+        ListCertReply list_cert = 1;
+        SignHashReply sign_hash = 2;
+        SignPdfReply sign_pdf = 3;
+    }
+}
+
+// Request
+message SignHashRequest {
+    string Pin = 1;
+}
+
+message ListCertRequest {
+    string Pin = 1;
+}
+
+message SignPdfRequest {
+    string Pin = 1;
+}
+
+// Reply
+message SignHashReply {
+    string Pin = 1;
+}
+
+message ListCertReply {
+    string Pin = 1;
+}
+
+message SignPdfReply {
+    string Pin = 1;
 }
