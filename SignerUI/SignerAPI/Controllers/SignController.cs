@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Signer.Services.FileUpload;
 using SignerAPI.Dto;
 using SignerAPI.Services;
 
@@ -11,30 +12,37 @@ namespace SignerAPI.Controllers
         private readonly ISignService _signService = signService;
 
         [HttpGet("")]
-        public IActionResult GetHealth()
+        public async Task<IActionResult> GetHealth()
         {
-            var isOke = _signService.CheckHealth();
+            var isOke = await _signService.CheckHealth();
             return Ok(isOke);
         }
 
-        [HttpGet("/health")]
-        public IActionResult GetHealth2()
+        [HttpGet("health")]
+        public async Task<IActionResult> GetHealth2()
         {
-            var isOke = _signService.CheckHealth();
+            var isOke = await _signService.CheckHealth();
+            return Ok(isOke);
+        }
+
+        [HttpGet("start")]
+        public async Task<IActionResult> StartService()
+        {
+            var isOke = await _signService.StartService();
             return Ok(isOke);
         }
 
         [HttpGet("certs")]
-        public IActionResult ListCert([FromQuery] CertQuery query)
+        public async Task<IActionResult> ListCert([FromQuery] CertQuery query)
         {
             var data = _signService.ListCerts(query.Pin);
             return Ok(data);
         }
 
         [HttpPost("sign")]
-        public IActionResult SignHash([FromBody] SignBody body)
+        public async Task<IActionResult> SignHash([FromBody] SignBody body)
         {
-            var data = _signService.SignHash(body.Pin, body.Thumbprint, body.HashToSignBase64);
+            var data = await _signService.SignHash(body.Pin, body.Thumbprint, body.HashToSignBase64);
             return Ok(data);
         }
 
@@ -48,7 +56,7 @@ namespace SignerAPI.Controllers
             var inputImagePath = await fileUpload.SaveFileAsync(form.Image, "image");
             var outputPdfPath = Path.Combine(outputRoot, Guid.NewGuid() + "_signed.pdf").Replace("\\", "/");
 
-            _signService.SignPdfFile(
+            await _signService.SignPdfFile(
                 form.Pin, form.Thumbprint, inputPdfPath, outputPdfPath, inputImagePath,
                 new PositionData()
                 {

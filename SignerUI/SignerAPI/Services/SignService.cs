@@ -1,6 +1,4 @@
-﻿using Signer.Models;
-using SignerAPI.Domains.WorkerCall;
-using System.Threading.Tasks;
+﻿using SignerAPI.Domains.WorkerCall;
 using WorkerProto;
 
 namespace SignerAPI.Services
@@ -12,6 +10,12 @@ namespace SignerAPI.Services
         public async Task<bool> CheckHealth()
         {
             var isOke = await _workerCall.CheckHealth();
+            return isOke;
+        }
+
+        public async Task<bool> StartService()
+        {
+            var isOke = await _workerCall.StartCoreServiceAsync();
             return isOke;
         }
 

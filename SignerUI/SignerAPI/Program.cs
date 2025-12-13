@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using Signer.Services.FileUpload;
 using SignerAPI.Domains.WorkerCall;
 using SignerAPI.Middlewares;
 using SignerAPI.Services;
@@ -15,6 +16,7 @@ namespace SignerAPI
             builder.Services.AddControllers();
             builder.Services.AddScoped<IWorkerCall, WorkerCall>();
             builder.Services.AddScoped<ISignService, SignService>();
+            builder.Services.AddScoped<IFileUpload, FileUpload>();
 
             var app = builder.Build();
 
@@ -29,10 +31,6 @@ namespace SignerAPI
 
                 onStartedCallback?.Invoke(runningUrls);
             });
-
-            //app.MapGet("/", () => "Hello World!");
-            //app.MapGet("/test", () => WorkerCall.Call());
-            //app.MapGet("/start-core-service", () => WorkerCall.StartCoreServiceAsync());
 
             app.UseMiddleware<ApiExceptionMiddleware>();
             app.MapControllers();
