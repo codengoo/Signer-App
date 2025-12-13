@@ -4,6 +4,6 @@ namespace SignerAPI.Services
 {
     public interface IScanService
     {
-        public Task<List<DllInfo>> Scan();
+        public List<DllInfo> ListDll();
     }
 }

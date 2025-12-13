@@ -11,7 +11,7 @@ namespace SignerAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetDll()
         {
-            var results = await scanService.Scan();
+            var results = scanService.ListDll();
             return Ok(results);
         }
     }

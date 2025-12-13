@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Signer.Services.FileUpload;
+using SignerAPI.Domains.ScanDll;
 using SignerAPI.Domains.WorkerCall;
 using SignerAPI.Middlewares;
 using SignerAPI.Services;
@@ -20,7 +21,8 @@ namespace SignerAPI
 
             builder.Services.AddControllers();
             builder.Services.AddSingleton<IWorkerCall, WorkerCall>();
-            builder.Services.AddSingleton<ISignService, SignService>();
+            builder.Services.AddSingleton<IDllScaner, DllScaner>();
+            builder.Services.AddScoped<ISignService, SignService>();
             builder.Services.AddScoped<IScanService, ScanService>();
             builder.Services.AddScoped<IFileUpload, FileUpload>();
 

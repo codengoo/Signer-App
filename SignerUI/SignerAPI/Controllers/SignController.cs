@@ -8,7 +8,7 @@ namespace SignerAPI.Controllers
 {
     [Route("api")]
     [ApiController]
-    public class SignController(ISignService signService, IScanService scanService, IFileUpload fileUpload, IHostEnvironment env) : ControllerBase
+    public class SignController(ISignService signService, IFileUpload fileUpload, IHostEnvironment env) : ControllerBase
     {
         private List<DllInfo> dllList = [];
 
@@ -31,13 +31,6 @@ namespace SignerAPI.Controllers
         {
             var data = await signService.ListCerts(query.Pin);
             return Ok(data);
-        }
-
-        [HttpGet("dll")]
-        public async Task<IActionResult> ListAllCert([FromQuery] CertQuery query)
-        {
-            var dll = await signService.FindDll(query.Pin);
-            return Ok(dll);
         }
 
         [HttpPost("sign")]
