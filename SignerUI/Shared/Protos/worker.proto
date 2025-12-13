@@ -1,4 +1,4 @@
-syntax = "proto3";
+﻿syntax = "proto3";
 
 option csharp_namespace = "WorkerProto";
 
@@ -13,12 +13,13 @@ enum TaskType {
 }
 
 message WorkRequest {
-    TaskType task = 1;
+    TaskType Task = 1;
+    SignerContext Context = 2;
 
     oneof payload {
-        ListCertRequest list_cert = 2;
-        SignHashRequest sign_hash = 3;
-        SignPdfRequest sign_pdf = 4;
+        ListCertRequest list_cert = 3;
+        SignHashRequest sign_hash = 4;
+        SignPdfRequest sign_pdf = 5;
     }
 }
 
@@ -28,19 +29,29 @@ message WorkReply {
         SignHashReply sign_hash = 2;
         SignPdfReply sign_pdf = 3;
     }
+
+  bool success = 10;          // true nếu thành công
+  string error_message = 11;  // lỗi nếu có
+}
+
+// Context
+message SignerContext {
+    string Pin = 1;
+    string DllPath = 2;
 }
 
 // Request
-message SignHashRequest {
-    string Pin = 1;
+message ListCertRequest {
+
 }
 
-message ListCertRequest {
-    string Pin = 1;
+message SignHashRequest {
+    string Thumprint = 3;
+    string HashData = 4;
 }
 
 message SignPdfRequest {
-    string Pin = 1;
+     
 }
 
 // Reply

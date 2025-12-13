@@ -13,15 +13,16 @@ using ISession = Net.Pkcs11Interop.HighLevelAPI.ISession;
 
 namespace SignerCore.Domains
 {
-    public class PKCSSigner
+    public class PKCSSigner: IDisposable
     {
-        private readonly String PKCSLibPath = Path.Combine(AppContext.BaseDirectory, "Native/fca_v1.dll");
+        private readonly string PKCSLibPath;
         private readonly Pkcs11InteropFactories _factories;
-        private Net.Pkcs11Interop.HighLevelAPI.ISession? _session;
+        private ISession? _session;
         private IPkcs11Library? _library;
 
-        public PKCSSigner(String pin)
+        public PKCSSigner(string pin, string dllPath)
         {
+            PKCSLibPath = dllPath;
             _factories = new Pkcs11InteropFactories();
             _library = _factories.Pkcs11LibraryFactory.LoadPkcs11Library(
                _factories,
@@ -40,7 +41,7 @@ namespace SignerCore.Domains
             _session.Login(CKU.CKU_USER, pin);
         }
 
-        public List<CertInfo> LoadCert()
+        public List<CertInfo> ListCerts()
         {
             if (_session == null) throw new Exception("No session init.");
             List<IObjectHandle> certs = _session.FindAllObjects(
@@ -79,7 +80,7 @@ namespace SignerCore.Domains
 
         public CertInfo? GetCertByThumprint(String thumbprint)
         {
-            var certList = this.LoadCert();
+            var certList = this.ListCerts();
             foreach (var cert in certList)
             {
                 if (String.Equals(cert.Thumbprint, thumbprint, StringComparison.OrdinalIgnoreCase))

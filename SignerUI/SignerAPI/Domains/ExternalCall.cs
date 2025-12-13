@@ -16,7 +16,7 @@ namespace SignerAPI.Domains
             });
 
             Console.WriteLine("Response from worker:");
-            Console.WriteLine(reply.Output);
+            Console.WriteLine(reply);
         }
     }
 }
