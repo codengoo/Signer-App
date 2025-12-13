@@ -35,7 +35,7 @@ namespace SignerAPI.Controllers
         [HttpGet("certs")]
         public async Task<IActionResult> ListCert([FromQuery] CertQuery query)
         {
-            var data = _signService.ListCerts(query.Pin);
+            var data = await _signService.ListCerts(query.Pin);
             return Ok(data);
         }
 

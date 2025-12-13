@@ -11,9 +11,10 @@ service Worker {
 }
 
 enum TaskType {
-    LIST_CERTS_UNSPECIFIED = 0;
+    LIST_CERTS = 0;
     SIGN_HASH = 1;
     SIGN_PDF = 2;
+    PING_UNSPECIFIED = 3;
 }
 
 message WorkRequest {

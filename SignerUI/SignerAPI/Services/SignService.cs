@@ -24,7 +24,7 @@ namespace SignerAPI.Services
             var result = await _workerCall.Call(
                 new WorkRequest()
                 {
-                    Task = TaskType.ListCertsUnspecified,
+                    Task = TaskType.ListCerts,
                     Context = new SignerContext() { DllPath = "", Pin = userPin }
                 },
                 Arch.X86);

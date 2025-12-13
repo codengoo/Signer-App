@@ -11,10 +11,15 @@ namespace SignerAPI
     {
         public static WebApplication Create(Action<ICollection<string>>? onStartedCallback = null)
         {
+            AppContext.SetSwitch(
+                "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport",
+                true
+            );
+
             var builder = WebApplication.CreateBuilder();
 
             builder.Services.AddControllers();
-            builder.Services.AddScoped<IWorkerCall, WorkerCall>();
+            builder.Services.AddSingleton<IWorkerCall, WorkerCall>();
             builder.Services.AddScoped<ISignService, SignService>();
             builder.Services.AddScoped<IFileUpload, FileUpload>();
 

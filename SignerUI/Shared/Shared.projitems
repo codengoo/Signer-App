@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Models\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Utils\" />
     <Folder Include="$(MSBuildThisFileDirectory)Protos\" />
     <Folder Include="$(MSBuildThisFileDirectory)Services\FileUpload\" />
   </ItemGroup>
@@ -23,5 +24,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)models\CertInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)services\fileupload\FileUpload.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)services\fileupload\IFileUpload.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)utils\ProcessHelper.cs" />
   </ItemGroup>
 </Project>

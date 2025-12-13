@@ -22,7 +22,8 @@ namespace SignerCore.Services
             {
                 TaskType.SignHash => HandleSignHash(request.Context, request.SignHash),
                 TaskType.SignPdf => HandleSignPdf(request.Context, request.SignPdf),
-                TaskType.ListCertsUnspecified => HandleListCert(request.Context, request.ListCert),
+                TaskType.ListCerts => HandleListCert(request.Context, request.ListCert),
+                TaskType.PingUnspecified => HandlePing(),
                 _ => throw new RpcException(new Status(StatusCode.InvalidArgument, "Unknown task"))
             };
 
@@ -135,5 +136,15 @@ namespace SignerCore.Services
             });
         }
 
+        private static WorkReply HandlePing()
+        {
+            return ExecuteTask(() =>
+            {
+                return new WorkReply
+                {
+                    Success = true,
+                };
+            });
+        }
     }
 }

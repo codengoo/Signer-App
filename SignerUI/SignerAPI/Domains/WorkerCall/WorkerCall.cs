@@ -9,33 +9,25 @@ namespace SignerAPI.Domains.WorkerCall
         private static readonly HttpClient _http = new();
         private static readonly int PORT_86 = 8686;
         private static readonly int PORT_64 = 6464;
-        private Process? proc86 = null;
-        private Process? proc64 = null;
+        private readonly GrpcChannel _channel86;
+        private readonly GrpcChannel _channel64;
 
-        private static async Task CheckWorkerHealthAsync(Process proc, string url)
+        public WorkerCall()
         {
-            var timeoutAt = DateTime.UtcNow.AddSeconds(10);
-
-            while (DateTime.UtcNow < timeoutAt)
+            var handler = new SocketsHttpHandler
             {
-                if (proc.HasExited)
-                    throw new Exception($"Worker exited early: {url}");
+                EnableMultipleHttp2Connections = true
+            };
 
-                try
-                {
-                    var resp = await _http.GetAsync(url);
-                    if (resp.IsSuccessStatusCode)
-                        return;
-                }
-                catch
-                {
-                    // ignore & retry
-                }
+            _channel86 = GrpcChannel.ForAddress(
+                $"http://localhost:{PORT_86}",
+                new GrpcChannelOptions { HttpHandler = handler }
+            );
 
-                await Task.Delay(500);
-            }
-
-            throw new Exception($"Health check timeout: {url}");
+            _channel64 = GrpcChannel.ForAddress(
+                $"http://localhost:{PORT_64}",
+                new GrpcChannelOptions { HttpHandler = handler }
+            );
         }
 
         private static void KillProcess(Process? proc)
@@ -63,15 +55,45 @@ namespace SignerAPI.Domains.WorkerCall
             return process;
         }
 
+        private async Task CheckWorkerHealthAsync(Arch arch)
+        {
+            var timeoutAt = DateTime.UtcNow.AddSeconds(10);
+
+            while (DateTime.UtcNow < timeoutAt)
+            {
+                try
+                {
+                    var result = await Call(new WorkRequest() { Task = TaskType.PingUnspecified }, arch);
+                    if (result == null || !result.Success) throw new Exception(result?.ErrorMessage ?? "unknown error");
+                    return;
+                }
+                catch
+                {
+                    // ignore & retry
+                }
+
+                await Task.Delay(500);
+            }
+
+            throw new Exception($"Health check timeout: " + arch.ToString());
+        }
+
         public async Task<bool> StartCoreServiceAsync()
         {
             var filePath86 = @"D:\WORK\aaaa\out\x86\SignerCore.exe";
-            var filePath64 = @"D:\WORK\aaaa\out\x86\SignerCore.exe";
+            var filePath64 = @"D:\WORK\aaaa\out\x64\SignerCore.exe";
+            Process? proc86 = null;
+            Process? proc64 = null;
 
             try
             {
+                // nhóm process để khi main kill thì các process cũng kill
+                var job = ProcessHelper.CreateJob();
                 proc86 = StartProcess(filePath86, PORT_86);
                 proc64 = StartProcess(filePath64, PORT_64);
+
+                ProcessHelper.Assign(proc86, job);
+                ProcessHelper.Assign(proc64, job);
 
                 await CheckHealth();
                 return true;
@@ -86,20 +108,16 @@ namespace SignerAPI.Domains.WorkerCall
 
         public async Task<WorkReply?> Call(WorkRequest request, Arch arch)
         {
-            using var channel = GrpcChannel.ForAddress(arch == Arch.X86 ? $"https://localhost:{PORT_86}" : $"https://localhost:{PORT_86}");
+            var channel = arch == Arch.X86 ? _channel86 : _channel64;
             var client = new Worker.WorkerClient(channel);
             return await client.DoWorkAsync(request);
         }
 
         public async Task<bool> CheckHealth()
         {
-
-            if (proc86 == null || proc64 == null)
-                throw new Exception("Failed to start one or both processes.");
-
             await Task.WhenAll(
-               CheckWorkerHealthAsync(proc86, $"http://localhost:{PORT_86}/health"),
-               CheckWorkerHealthAsync(proc64, $"http://localhost:{PORT_64}/health")
+               CheckWorkerHealthAsync(Arch.X86),
+               CheckWorkerHealthAsync(Arch.X64)
            );
 
             return true;
