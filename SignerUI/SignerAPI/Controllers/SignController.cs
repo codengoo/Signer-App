@@ -1,48 +1,49 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Signer.Services.FileUpload;
 using SignerAPI.Dto;
+using SignerAPI.Models;
 using SignerAPI.Services;
 
 namespace SignerAPI.Controllers
 {
     [Route("api")]
     [ApiController]
-    public class SignController(ISignService signService, IFileUpload fileUpload, IHostEnvironment env) : ControllerBase
+    public class SignController(ISignService signService, IScanService scanService, IFileUpload fileUpload, IHostEnvironment env) : ControllerBase
     {
-        private readonly ISignService _signService = signService;
+        private List<DllInfo> dllList = [];
 
         [HttpGet("")]
         public async Task<IActionResult> GetHealth()
         {
-            var isOke = await _signService.CheckHealth();
-            return Ok(isOke);
-        }
-
-        [HttpGet("health")]
-        public async Task<IActionResult> GetHealth2()
-        {
-            var isOke = await _signService.CheckHealth();
+            var isOke = await signService.CheckHealth();
             return Ok(isOke);
         }
 
         [HttpGet("start")]
         public async Task<IActionResult> StartService()
         {
-            var isOke = await _signService.StartService();
+            var isOke = await signService.StartService();
             return Ok(isOke);
         }
 
         [HttpGet("certs")]
         public async Task<IActionResult> ListCert([FromQuery] CertQuery query)
         {
-            var data = await _signService.ListCerts(query.Pin);
+            var data = await signService.ListCerts(query.Pin);
             return Ok(data);
+        }
+
+        [HttpGet("dll")]
+        public async Task<IActionResult> ListAllCert([FromQuery] CertQuery query)
+        {
+            var dll = await signService.FindDll(query.Pin);
+            return Ok(dll);
         }
 
         [HttpPost("sign")]
         public async Task<IActionResult> SignHash([FromBody] SignBody body)
         {
-            var data = await _signService.SignHash(body.Pin, body.Thumbprint, body.HashToSignBase64);
+            var data = await signService.SignHash(body.Pin, body.Thumbprint, body.HashToSignBase64);
             return Ok(data);
         }
 
@@ -56,7 +57,7 @@ namespace SignerAPI.Controllers
             var inputImagePath = await fileUpload.SaveFileAsync(form.Image, "image");
             var outputPdfPath = Path.Combine(outputRoot, Guid.NewGuid() + "_signed.pdf").Replace("\\", "/");
 
-            await _signService.SignPdfFile(
+            await signService.SignPdfFile(
                 form.Pin, form.Thumbprint, inputPdfPath, outputPdfPath, inputImagePath,
                 new PositionData()
                 {

@@ -1,13 +1,8 @@
-﻿using WorkerProto;
+﻿using Signer.Models;
+using WorkerProto;
 
 namespace SignerAPI.Domains.WorkerCall
 {
-    public enum Arch
-    {
-        X86,
-        X64
-    }
-
     public interface IWorkerCall
     {
         public Task<bool> StartCoreServiceAsync();

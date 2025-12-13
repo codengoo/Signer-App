@@ -1,4 +1,5 @@
 ﻿using Grpc.Net.Client;
+using Signer.Models;
 using System.Diagnostics;
 using WorkerProto;
 

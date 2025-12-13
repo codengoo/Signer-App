@@ -20,7 +20,8 @@ namespace SignerAPI
 
             builder.Services.AddControllers();
             builder.Services.AddSingleton<IWorkerCall, WorkerCall>();
-            builder.Services.AddScoped<ISignService, SignService>();
+            builder.Services.AddSingleton<ISignService, SignService>();
+            builder.Services.AddScoped<IScanService, ScanService>();
             builder.Services.AddScoped<IFileUpload, FileUpload>();
 
             var app = builder.Build();

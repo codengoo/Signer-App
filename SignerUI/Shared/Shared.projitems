@@ -21,6 +21,7 @@
     <None Include="$(MSBuildThisFileDirectory)protos\worker.proto" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)models\Arch.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)models\CertInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)services\fileupload\FileUpload.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)services\fileupload\IFileUpload.cs" />
