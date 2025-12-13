@@ -1,0 +1,24 @@
+﻿syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "WorkerProto";
+
+// Request
+message ListCertRequest {
+}
+
+// Reply
+message ListCertReply {
+    repeated ListCertData certs = 1;
+}
+
+message ListCertData {
+    string label = 1;
+    bytes key_id = 2;
+    string subject = 3;
+    string thumbprint = 4;
+    google.protobuf.Timestamp not_before = 5;
+    google.protobuf.Timestamp not_after = 6;
+    string cert_base64 = 7;
+}

@@ -1,5 +1,7 @@
 ﻿syntax = "proto3";
 
+import "list_cert.proto";
+
 option csharp_namespace = "WorkerProto";
 
 service Worker {
@@ -40,11 +42,6 @@ message SignerContext {
     string DllPath = 2;
 }
 
-// Request
-message ListCertRequest {
-
-}
-
 message SignHashRequest {
     string Thumprint = 3;
     string HashData = 4;
@@ -54,12 +51,7 @@ message SignPdfRequest {
      
 }
 
-// Reply
 message SignHashReply {
-    string Pin = 1;
-}
-
-message ListCertReply {
     string Pin = 1;
 }
 

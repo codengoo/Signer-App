@@ -13,6 +13,7 @@
     <Folder Include="$(MSBuildThisFileDirectory)Protos\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)protos\list_cert.proto" />
     <None Include="$(MSBuildThisFileDirectory)protos\worker.proto" />
   </ItemGroup>
   <ItemGroup>

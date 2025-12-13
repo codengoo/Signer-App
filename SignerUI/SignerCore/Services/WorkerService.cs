@@ -1,5 +1,6 @@
-﻿using Grpc.Core;
-using Signer.Models;
+﻿using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
+using Grpc.Core;
 using SignerCore.Domains;
 using WorkerProto;
 
@@ -46,9 +47,23 @@ namespace SignerCore.Services
                 using var pkcs = new PKCSSigner(context.Pin, context.DllPath);
                 var certs = pkcs.ListCerts();
 
+                var certDataList = certs.Select(c => new ListCertData
+                {
+                    Label = c.Label,
+                    KeyId = ByteString.CopyFrom(c.KeyId),
+                    Subject = c.Subject,
+                    Thumbprint = c.Thumbprint,
+                    NotBefore = Timestamp.FromDateTime(c.NotBefore.ToUniversalTime()),
+                    NotAfter = Timestamp.FromDateTime(c.NotAfter.ToUniversalTime()),
+                    CertBase64 = c.CertBase64
+                }).ToList();
+
                 return new WorkReply
                 {
-                    ListCert = new ListCertReply { Pin = "123" }
+                        Success: true,
+                    ListCert = new ListCertReply {
+                         Certs = { certDataList }
+                    }
                     // TODO: map certs to ListCertReply fields
                 };
             });
