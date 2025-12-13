@@ -1,6 +1,12 @@
 ﻿using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using iText.Forms.Form.Element;
+using iText.IO.Image;
+using iText.Kernel.Colors;
+using iText.Kernel.Geom;
+using iText.Layout.Borders;
+using iText.Signatures;
 using SignerCore.Domains;
 using WorkerProto;
 
@@ -60,11 +66,11 @@ namespace SignerCore.Services
 
                 return new WorkReply
                 {
-                        Success: true,
-                    ListCert = new ListCertReply {
-                         Certs = { certDataList }
+                    Success = true,
+                    ListCert = new ListCertReply
+                    {
+                        Certs = { certDataList }
                     }
-                    // TODO: map certs to ListCertReply fields
                 };
             });
         }
@@ -78,11 +84,16 @@ namespace SignerCore.Services
                             ?? throw new Exception("Cert not found");
                 var privateKey = pkcs.GetPrivateKey(cert.KeyId)
                             ?? throw new Exception("Private key not found");
+                var signature = pkcs.SignHash(req.HashData, privateKey);
 
                 return new WorkReply
                 {
-                    ListCert = new ListCertReply { Pin = "123" }
-                    // TODO: map certs to ListCertReply fields
+                    Success = true,
+                    SignHash = new SignHashReply
+                    {
+                        SignatureBase64 = signature,
+                        CertificateBase64 = cert.CertBase64
+                    }
                 };
             });
         }
@@ -92,12 +103,34 @@ namespace SignerCore.Services
             return ExecuteTask(() =>
             {
                 using var pkcs = new PKCSSigner(context.Pin, context.DllPath);
-                var certs = pkcs.ListCerts();
+                var cert = pkcs.GetCertByThumprint(req.Thumprint)
+                           ?? throw new Exception("Cert not found");
+
+                var position = req.Position;
+                SignatureFieldAppearance appearance = new SignatureFieldAppearance("signature-field");
+                appearance.SetWidth(position.Width);
+                appearance.SetHeight(position.Height);
+                appearance.SetBorder(new SolidBorder(ColorConstants.DARK_GRAY, 2));
+                appearance.SetContent(ImageDataFactory.Create(req.ImagePath));
+
+                SignerProperties signerProps = new SignerProperties()
+                    .SetFieldName("signature-field")
+                    .SetPageRect(new Rectangle(position.PosX, position.PosY, position.Width, position.Height))
+                    .SetPageNumber(position.Page)
+                    .SetReason("Tôi đồng ý với nội dung tài liệu")
+                    .SetLocation("Việt Nam")
+                    .SetSignatureAppearance(appearance);
+
+                pkcs.SignPdfFile(cert, req.InputPath, req.OutpuPath, signerProps);
 
                 return new WorkReply
                 {
-                    ListCert = new ListCertReply { Pin = "123" }
-                    // TODO: map certs to ListCertReply fields
+                    Success = true,
+                    SignPdf = new SignPdfReply
+                    {
+                        InputPath = req.InputPath,
+                        OutputPath = req.OutpuPath,
+                    }
                 };
             });
         }

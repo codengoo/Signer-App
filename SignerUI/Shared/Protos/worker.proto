@@ -1,6 +1,8 @@
 ﻿syntax = "proto3";
 
 import "list_cert.proto";
+import "sign_hash.proto";
+import "sign_pdf.proto";
 
 option csharp_namespace = "WorkerProto";
 
@@ -40,21 +42,4 @@ message WorkReply {
 message SignerContext {
     string Pin = 1;
     string DllPath = 2;
-}
-
-message SignHashRequest {
-    string Thumprint = 3;
-    string HashData = 4;
-}
-
-message SignPdfRequest {
-     
-}
-
-message SignHashReply {
-    string Pin = 1;
-}
-
-message SignPdfReply {
-    string Pin = 1;
 }

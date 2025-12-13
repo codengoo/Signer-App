@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+message SignPdfRequest {
+     string Thumprint = 1;
+     string InputPath = 2;
+     string OutpuPath = 3;
+     string ImagePath = 4;
+     PositionData Position = 5;
+ }
+
+message SignPdfReply {
+    string OutputPath = 1;
+    string InputPath = 2;
+}
+
+message PositionData {
+    int32 Page = 1;
+    int32 PosX = 2;
+    int32 PosY = 3;
+    int32 Width = 4;
+    int32 Height = 5;
+}

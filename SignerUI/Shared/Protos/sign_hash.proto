@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+message SignHashRequest {
+    string Thumprint = 1;
+    string HashData = 2;
+}
+
+message SignHashReply {
+    string SignatureBase64 = 1;
+    string CertificateBase64 = 2;
+}

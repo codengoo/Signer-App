@@ -14,6 +14,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)protos\list_cert.proto" />
+    <None Include="$(MSBuildThisFileDirectory)protos\sign_hash.proto" />
+    <None Include="$(MSBuildThisFileDirectory)protos\sign_pdf.proto" />
     <None Include="$(MSBuildThisFileDirectory)protos\worker.proto" />
   </ItemGroup>
   <ItemGroup>

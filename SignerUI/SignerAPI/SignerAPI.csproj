@@ -17,6 +17,9 @@
 
 	<ItemGroup>
 		<Protobuf Include="..\Shared\Protos\worker.proto" GrpcServices="Client" />
+		<Protobuf Include="..\Shared\Protos\list_cert.proto" GrpcServices="Client" />
+		<Protobuf Include="..\Shared\Protos\sign_hash.proto" GrpcServices="Client" />
+		<Protobuf Include="..\Shared\Protos\sign_pdf.proto" GrpcServices="Client" />
 	</ItemGroup>
 
 	<Import Project="..\Shared\Shared.projitems" Label="Shared" />
